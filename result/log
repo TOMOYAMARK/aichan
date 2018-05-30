@@ -1,0 +1,27 @@
+[
+    {
+        "epoch": 1,
+        "iteration": 6000,
+        "elapsed_time": 48.06910841399804
+    },
+    {
+        "epoch": 2,
+        "iteration": 12000,
+        "elapsed_time": 96.01741831802065
+    },
+    {
+        "epoch": 3,
+        "iteration": 18000,
+        "elapsed_time": 144.10028716304805
+    },
+    {
+        "epoch": 4,
+        "iteration": 24000,
+        "elapsed_time": 191.9113112690393
+    },
+    {
+        "epoch": 5,
+        "iteration": 30000,
+        "elapsed_time": 239.7607944360352
+    }
+]
