@@ -10,8 +10,8 @@ from numpy import random
 from PIL import Image
 import codecs
 
-uses_device = -1			# GPU#0を使用
-image_size = 64		# 生成画像のサイズ
+uses_device = 0			# GPU#0を使用
+image_size = 128		# 生成画像のサイズ
 neuron_size = 64		# 中間層のサイズ
 
 # GPU使用時とCPU使用時でデータ形式が変わる
@@ -61,10 +61,10 @@ if uses_device >= 0:
 	model.to_gpu()
 
 # 学習結果を読み込む
-chainer.serializers.load_hdf5( 'genchar.hdf5', model )
+chainer.serializers.load_hdf5( 'genchar_gen2_5_31_128.hdf5', model )
 
 # 画像を生成する
-num_generate = 500	# 生成する画像の数
+num_generate =500	# 生成する画像の数
 # 元となるベクトルを作成
 rnd = random.uniform(-1, 1, (num_generate, 100, 1, 1))
 rnd = cp.array(rnd, dtype=cp.float32)
@@ -77,7 +77,7 @@ with chainer.using_config('imgs/pokemon/full/gens', False):
 f = codecs.open('vectors.txt', 'w', 'utf8')
 for i in range(num_generate):
 	# 画像を保存する
-	data = np.zeros((64, 64, 3), dtype=np.uint8)
+	data = np.zeros((128,128, 3), dtype=np.uint8)
 	dst = result.data[i] * 255.0
 	if uses_device >= 0:
 		dst = chainer.cuda.to_cpu(dst)

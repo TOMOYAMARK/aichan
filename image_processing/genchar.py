@@ -10,9 +10,15 @@ from numpy import random
 from PIL import Image
 
 batch_size = 10			# バッチサイズ10
-uses_device = -1
+uses_device = 0 #GPUを使用
 image_size = 64		# 生成画像のサイズ
 neuron_size = 64		# 中間層のサイズ
+
+if uses_device>=0:
+	import cupy as cp
+	import chainer.cuda
+else:
+	cp = np
 
 # ベクトルから画像を生成するNN
 class DCGAN_Generator_NN(chainer.Chain):
@@ -115,7 +121,7 @@ class DCGANUpdater(training.StandardUpdater):
 
 		# 乱数データを用意
 		rnd = random.uniform(-1, 1, (src.shape[0], 100))
-		rnd = np.array(rnd, dtype=np.float32)
+		rnd = cp.array(rnd, dtype=cp.float32)
 
 		# 画像を生成して認識と教師データから認識
 		x_fake = gen(rnd)		# 乱数からの生成結果
@@ -131,6 +137,14 @@ class DCGANUpdater(training.StandardUpdater):
 model_gen = DCGAN_Generator_NN()
 model_dis = DCGAN_Discriminator_NN()
 
+if uses_device>=0:
+	#GPU使う
+	chainer.cuda.get_device_from_id(0).use()
+	chainer.cuda.check_cuda_available()
+	#GPU用にデータを変換
+	model_gen.to_gpu()
+	model_dis.to_gpu()
+
 images = []
 
 fs = os.listdir('imgs/pokemon/full')
@@ -138,7 +152,7 @@ for fn in fs:
 	# 画像を読み込んで128×128ピクセルにリサイズ
 	img = Image.open('imgs/pokemon/full/' + fn).convert('RGB').resize((64, 64))
 	# 画素データを0〜1の領域にする
-	hpix = np.array(img, dtype=np.float32) / 255.0
+	hpix = cp.array(img, dtype=cp.float32) / 255.0
 	hpix = hpix.transpose(2,0,1)
 	# 配列に追加
 	images.append(hpix)
@@ -156,7 +170,7 @@ optimizer_dis.setup(model_dis)
 updater = DCGANUpdater(train_iter, \
 		{'opt_gen':optimizer_gen, 'opt_dis':optimizer_dis}, \
 		device=uses_device)
-trainer = training.Trainer(updater, (700, 'epoch'), out="result")
+trainer = training.Trainer(updater, (4000, 'epoch'), out="result")
 # 学習の進展を表示するようにする
 trainer.extend(extensions.ProgressBar())
 
